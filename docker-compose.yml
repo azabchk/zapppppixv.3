@@ -1,27 +1,27 @@
-version: '3.8'
-
 services:
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: toy_exchange
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-  app:
+  web:
     build: .
-    ports:
-      - "8000:8000"
+    restart: unless-stopped
     depends_on:
       - db
     environment:
-      DATABASE_URL: postgresql://postgres:password@db:5432/toy_exchange
-      ADMIN_TOKEN: admin-token-jhiefwoehreufgh32rhoi
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/zapppppixv3
+      - ADMIN_TOKEN=0710931528bc1680f5ab26a40f2a2569d4453871c3bd70c5e3bb632ab2b197c8
+    ports:
+      - 8000:8000
+
+  db:
+    image: postgres:13
+    restart: unless-stopped
+    ports:
+      - 5432:5432
     volumes:
-      - .:/app
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=tochka
 
 volumes:
   postgres_data:
+

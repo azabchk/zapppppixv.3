@@ -6,24 +6,24 @@ import uuid
 import os
 from datetime import datetime
 
-# Получаем URL из переменной окружения или используем PostgreSQL по умолчанию для Docker
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@db:5432/toy_exchange")
+# Get the database URL from an environment variable or use the default PostgreSQL for Docker
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@db:5432/zappppppix_exchange")
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True, echo=False)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# Модели базы данных
+# Database models
 class User(Base):
     __tablename__ = "users"
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, nullable=False)
-    role = Column(String, default="USER")  # USER или ADMIN
+    role = Column(String, default="USER")  # USER or ADMIN
     api_key = Column(String, unique=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     
-    # Связи
+    # Relationships
     balances = relationship("Balance", back_populates="user")
     orders = relationship("Order", back_populates="user")
 
@@ -35,7 +35,7 @@ class Instrument(Base):
     type = Column(String, default="STOCK")  # STOCK, CURRENCY, BOND, etc.
     created_at = Column(DateTime, default=datetime.utcnow)
     
-    # Связи
+    # Relationships
     orders = relationship("Order", back_populates="instrument")
     transactions = relationship("Transaction", back_populates="instrument")
 
@@ -47,7 +47,7 @@ class Balance(Base):
     amount = Column(Integer, default=0)
     updated_at = Column(DateTime, default=datetime.utcnow)
     
-    # Связи
+    # Relationships
     user = relationship("User", back_populates="balances")
     instrument = relationship("Instrument")
 
@@ -57,15 +57,15 @@ class Order(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     ticker = Column(String, ForeignKey("instruments.ticker"), nullable=False)
-    direction = Column(String, nullable=False)  # BUY или SELL
+    direction = Column(String, nullable=False)  # BUY or SELL
     qty = Column(Integer, nullable=False)
-    price = Column(Integer, nullable=True)  # Цена для лимитных заявок
+    price = Column(Integer, nullable=True)  # Price for limit orders
     status = Column(String, default="NEW")  # NEW, EXECUTED, PARTIALLY_EXECUTED, CANCELLED
-    filled = Column(Integer, default=0)  # Исполненное количество
-    order_type = Column(String, nullable=False)  # LIMIT или MARKET
+    filled = Column(Integer, default=0)  # Executed quantity
+    order_type = Column(String, nullable=False)  # LIMIT or MARKET
     timestamp = Column(DateTime, default=datetime.utcnow)
     
-    # Связи
+    # Relationships
     user = relationship("User", back_populates="orders")
     instrument = relationship("Instrument", back_populates="orders")
 
@@ -80,12 +80,12 @@ class Transaction(Base):
     buyer_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     seller_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     
-    # Связи
+    # Relationships
     instrument = relationship("Instrument", back_populates="transactions")
     buyer = relationship("User", foreign_keys=[buyer_id])
     seller = relationship("User", foreign_keys=[seller_id])
 
-# Зависимость для получения сессии БД
+# Dependency for obtaining a DB session
 def get_db():
     db = SessionLocal()
     try:
@@ -93,9 +93,9 @@ def get_db():
     finally:
         db.close()
 
-# Создание таблиц
+# Create database tables
 def create_tables():
-    """Создать таблицы в базе данных"""
+    """Create tables in the database"""
     try:
         Base.metadata.create_all(bind=engine)
         print("Таблицы успешно созданы")

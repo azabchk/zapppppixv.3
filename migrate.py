@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """
-Скрипт миграции базы данных для добавления поля type в таблицу instruments
+Database migration script for adding the 'type' field to the instruments table
 """
 import os
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 def migrate_database():
-    # Подключаемся к базе данных
-    DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/toy_exchange")
+    # Connect to the database
+    DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/zappppppix_exchange")
     
-    # Парсим URL для подключения
+    # Parse the connection URL
     if DATABASE_URL.startswith("postgresql://"):
-        # Формат: postgresql://user:password@host:port/database
+        # Format: postgresql://user:password@host:port/database
         url_parts = DATABASE_URL.replace("postgresql://", "").split("/")
         db_name = url_parts[1]
         user_pass_host = url_parts[0].split("@")
@@ -27,7 +27,7 @@ def migrate_database():
         raise ValueError("Неподдерживаемый формат DATABASE_URL")
     
     try:
-        # Подключаемся к базе данных
+        # Connect to the database
         conn = psycopg2.connect(
             host=host,
             port=port,
@@ -39,7 +39,7 @@ def migrate_database():
         
         cursor = conn.cursor()
         
-        # Проверяем, существует ли колонка type
+        # Check whether the 'type' column exists
         cursor.execute("""
             SELECT column_name 
             FROM information_schema.columns 

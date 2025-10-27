@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List, Union
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 
 # Enums
@@ -18,7 +18,7 @@ class UserRole(str, Enum):
     USER = "USER"
     ADMIN = "ADMIN"
 
-# Базовые модели
+# Base models
 class NewUser(BaseModel):
     name: str = Field(..., min_length=3, description="Имя пользователя")
 
@@ -44,9 +44,9 @@ class Transaction(BaseModel):
     ticker: str
     amount: int
     price: int
-    timestamp: datetime
+    timestamp: datetime = Field(description="Transaction timestamp")
 
-# Модели заявок
+# Order models
 class LimitOrderBody(BaseModel):
     direction: Direction
     ticker: str
@@ -59,25 +59,37 @@ class MarketOrderBody(BaseModel):
     qty: int = Field(..., ge=1)
 
 class LimitOrder(BaseModel):
+    model_config = ConfigDict(
+        # Disable strict datetime timezone validation
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+    )
+    
     id: str
     status: OrderStatus
     user_id: str
-    timestamp: datetime
+    timestamp: datetime = Field(description="Order timestamp")
     body: LimitOrderBody
     filled: int = 0
 
 class MarketOrder(BaseModel):
+    model_config = ConfigDict(
+        # Disable strict datetime timezone validation
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+    )
+    
     id: str
     status: OrderStatus
     user_id: str
-    timestamp: datetime
+    timestamp: datetime = Field(description="Order timestamp")
     body: MarketOrderBody
 
 class CreateOrderResponse(BaseModel):
     success: bool = True
     order_id: str
 
-# Административные модели
+# Administrative models
 class DepositWithdrawBody(BaseModel):
     user_id: str = Field(..., description="ID пользователя")
     ticker: str = Field(..., description="Тикер инструмента")
@@ -86,7 +98,7 @@ class DepositWithdrawBody(BaseModel):
 class Ok(BaseModel):
     success: bool = True
 
-# Ответы для ошибок
+# Error responses
 class ValidationError(BaseModel):
     loc: List[Union[str, int]]
     msg: str
