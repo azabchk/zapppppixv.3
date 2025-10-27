@@ -26,9 +26,9 @@ def validate_uuid(uuid_string: str, field_name: str = "UUID") -> uuid.UUID:
 
 # Create a FastAPI application with OpenAPI settings
 app = FastAPI(
-    title="Good Exchange API",
+    title="zapppppix v.3",
     version="0.1.0",
-    description="Биржевая торговая платформа"
+    description="exchange updated platform"
 )
 
 # Create tables on startup
